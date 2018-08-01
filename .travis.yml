@@ -1,0 +1,16 @@
+dist: trusty
+sudo: false
+
+language: go
+go_import_path: github.com/huaweicloud/external-sfs
+
+go:
+  - 1.x
+
+install:
+  - make
+
+script:i
+  - go fmt $(go list ./... | grep -v vendor)
+  - go vet $(go list ./... | grep -v vendor)
+  - go test $(go list ./... | grep -v vendor)
