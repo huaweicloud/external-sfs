@@ -1,5 +1,5 @@
 /*
-Copyright 2017 The Kubernetes Authors.
+Copyright 2018 The Kubernetes Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -29,19 +29,21 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
+	"github.com/huaweicloud/external-sfs/pkg/config"
 	"github.com/huaweicloud/external-sfs/pkg/sfs"
 )
 
 var (
-	provisioner = flag.String("provisioner", "external.k8s.io/sfs", "Name of the provisioner. The provisioner will only provision volumes for claims that request a StorageClass with a provisioner field set equal to this name.")
-	master      = flag.String("master", "", "Master URL to build a client config from. Either this or kubeconfig needs to be set if the provisioner is being run out of cluster.")
-	kubeconfig  = flag.String("kubeconfig", "", "Absolute path to the kubeconfig file. Either this or master needs to be set if the provisioner is being run out of cluster.")
-
+	provisioner         = flag.String("provisioner", "external.k8s.io/sfs", "Name of the provisioner. The provisioner will only provision volumes for claims that request a StorageClass with a provisioner field set equal to this name.")
+	master              = flag.String("master", "", "Master URL to build a client config from. Either this or kubeconfig needs to be set if the provisioner is being run out of cluster.")
+	kubeconfig          = flag.String("kubeconfig", "", "Absolute path to the kubeconfig file. Either this or master needs to be set if the provisioner is being run out of cluster.")
+	cloudconfig         = flag.String("cloudconfig", "/etc/config/cloud.conf", "Absolute path to the cloud config")
+	sharetimeout        = flag.Int("sharetimeout", 600, "Share operation timeout. Unit: second")
 	provisionController *controller.ProvisionController
 )
 
 func init() {
-	var config *rest.Config
+	var restconfig *rest.Config
 	var err error
 
 	flag.Parse()
@@ -57,17 +59,22 @@ func init() {
 
 	if *master != "" || *kubeconfig != "" {
 		glog.Infof("Either master or kubeconfig specified. building kube config from that..")
-		config, err = clientcmd.BuildConfigFromFlags(*master, *kubeconfig)
+		restconfig, err = clientcmd.BuildConfigFromFlags(*master, *kubeconfig)
 	} else {
 		glog.Infof("Building kube configs for running in cluster...")
-		config, err = rest.InClusterConfig()
+		restconfig, err = rest.InClusterConfig()
 	}
 	if err != nil {
-		glog.Fatalf("Failed to create config: %v", err)
+		glog.Fatalf("Failed to create restconfig: %v", err)
 	}
-	clientset, err := kubernetes.NewForConfig(config)
+	clientset, err := kubernetes.NewForConfig(restconfig)
 	if err != nil {
 		glog.Fatalf("Failed to create client: %v", err)
+	}
+
+	cc, err := config.LoadConfig(*cloudconfig)
+	if err != nil {
+		glog.Fatalf("Failed to load cloud config: %v", err)
 	}
 
 	// The controller needs to know what the server version is because out-of-tree
@@ -80,7 +87,7 @@ func init() {
 	provisionController = controller.NewProvisionController(
 		clientset,
 		*provisioner,
-		sfs.NewProvisioner(clientset),
+		sfs.NewProvisioner(clientset, cc, *sharetimeout),
 		serverVersion.GitVersion,
 	)
 }

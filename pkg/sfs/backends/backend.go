@@ -14,41 +14,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package config
+package backends
 
 import (
-	"encoding/json"
-	"errors"
-	"io/ioutil"
-	"os"
+	"k8s.io/api/core/v1"
 )
 
-// LoadConfig from file
-func LoadConfig(configFile string) (cc CloudCredentials, err error) {
-	if configFile == "" {
-		return cc, errors.New("Must provide a config file")
-	}
+// Backend builds PersistentVolumeSource
+type Backend interface {
+	// Name of the share backend
+	Name() string
 
-	file, err := os.Open(configFile)
-	if err != nil {
-		return cc, err
-	}
-	defer file.Close()
+	// Called during share provision, the result is used in the final PersistentVolume object.
+	BuildSource(*BuildSourceArgs) (*v1.PersistentVolumeSource, error)
+}
 
-	bytes, err := ioutil.ReadAll(file)
-	if err != nil {
-		return cc, err
-	}
-
-	err = json.Unmarshal(bytes, &cc)
-	if err != nil {
-		return cc, err
-	}
-
-	err = cc.Validate()
-	if err != nil {
-		return cc, err
-	}
-
-	return cc, nil
+// BuildSourceArgs contains arguments
+type BuildSourceArgs struct {
+	Location string
 }

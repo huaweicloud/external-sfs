@@ -14,41 +14,34 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package config
+package sfs
 
 import (
-	"encoding/json"
-	"errors"
-	"io/ioutil"
-	"os"
+	"fmt"
+
+	"github.com/huaweicloud/external-sfs/pkg/sfs/backends"
 )
 
-// LoadConfig from file
-func LoadConfig(configFile string) (cc CloudCredentials, err error) {
-	if configFile == "" {
-		return cc, errors.New("Must provide a config file")
-	}
+var (
+	caches map[string]backends.Backend
+)
 
-	file, err := os.Open(configFile)
-	if err != nil {
-		return cc, err
-	}
-	defer file.Close()
+// InitBackends for share
+func InitBackends() {
+	caches = make(map[string]backends.Backend)
+	RegisterBackend(&backends.NFSBackend{})
+}
 
-	bytes, err := ioutil.ReadAll(file)
-	if err != nil {
-		return cc, err
-	}
+// RegisterBackend for share
+func RegisterBackend(b backends.Backend) {
+	caches[b.Name()] = b
+}
 
-	err = json.Unmarshal(bytes, &cc)
-	if err != nil {
-		return cc, err
+// GetBackend by name
+func GetBackend(name string) (backends.Backend, error) {
+	b, ok := caches[name]
+	if !ok {
+		return nil, fmt.Errorf("backend %s not found", name)
 	}
-
-	err = cc.Validate()
-	if err != nil {
-		return cc, err
-	}
-
-	return cc, nil
+	return b, nil
 }
