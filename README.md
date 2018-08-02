@@ -1,5 +1,5 @@
 # external-sfs
-[![Go Report Card](https://goreportcard.com/badge/github.com/huaweicloud/external-sfs?branch=master)(https://goreportcard.com/badge/github.com/huaweicloud/external-sfs)
+[![Go Report Card](https://goreportcard.com/badge/github.com/huaweicloud/external-sfs?branch=master)](https://goreportcard.com/badge/github.com/huaweicloud/external-sfs)
 [![Build Status](https://travis-ci.org/huaweicloud/external-sfs.svg?branch=master)](https://travis-ci.org/huaweicloud/external-sfs)
 [![LICENSE](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://github.com/huaweicloud/external-sfs/blob/master/LICENSE)
 
