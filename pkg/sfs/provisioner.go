@@ -28,11 +28,6 @@ import (
 	clientset "k8s.io/client-go/kubernetes"
 )
 
-// Defines constants
-const (
-	ShareStatusAvailable = "available"
-)
-
 // Provisioner implements controller.Provisioner interface
 type Provisioner struct {
 	clientset    clientset.Interface
@@ -58,32 +53,37 @@ func NewProvisioner(c clientset.Interface, cc config.CloudCredentials, timeout i
 func (p *Provisioner) Provision(volOptions controller.VolumeOptions) (*v1.PersistentVolume, error) {
 
 	// selector check
+	glog.Infof("Provision volOptions: %v", volOptions)
 	if volOptions.PVC.Spec.Selector != nil {
-		return nil, fmt.Errorf("claim Selector is not supported")
+		return nil, fmt.Errorf("Claim Selector is not supported")
 	}
 
 	// init sfs client
+	glog.Info("Init sfs client...")
 	client, err := p.cloudconfig.SFSV2Client()
 	if err != nil {
-		return nil, fmt.Errorf("failed to create SFS v2 client: %v", err)
+		return nil, fmt.Errorf("Failed to create SFS v2 client: %v", err)
 	}
 
 	// create share
+	glog.Info("Create share begin...")
 	share, err := CreateShare(client, &volOptions)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create share: %v", err)
+		return nil, fmt.Errorf("Failed to create share: %v", err)
 	}
 
 	// wait fo share available
-	err = WaitForShareStatus(client, share.ID, ShareStatusAvailable, p.sharetimeout)
+	glog.Infof("Wait fo share available: %s", share.ID)
+	err = WaitForShareStatus(client, share.ID, SFSStatusAvailable, p.sharetimeout)
 	if err != nil {
-		return nil, fmt.Errorf("waiting for share %s to become created failed: %v", share.ID, err)
+		return nil, fmt.Errorf("Waiting for share %s to become created failed: %v", share.ID, err)
 	}
 
 	// get new share
+	glog.Infof("Get share: %s", share.ID)
 	share, err = GetShare(client, share.ID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get share: %v", err)
+		return nil, fmt.Errorf("Failed to get share: %v", err)
 	}
 
 	// get location
@@ -92,27 +92,30 @@ func (p *Provisioner) Provision(volOptions controller.VolumeOptions) (*v1.Persis
 		location = share.ExportLocations[0]
 	}
 	if len(location) == 0 {
-		return nil, fmt.Errorf("failed to get share %s location", share.ID)
-	} else {
-		glog.Infof("get share %s location: %s", share.ID, location)
+		return nil, fmt.Errorf("Failed to get share %s location", share.ID)
 	}
+	glog.Infof("Get share: %s location: %s", share.ID, location)
 
 	// get backend
+	glog.Infof("Get backend: %s share protocal: %s", share.ID, share.ShareProto)
 	b, err := GetBackend(share.ShareProto)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get backend: %v", err)
 	}
 
 	// get persistent volume source
+	glog.Infof("Build source from share: %v", share)
 	pvsource, err := b.BuildSource(&backends.BuildSourceArgs{Location: location})
 	if err != nil {
-		return nil, fmt.Errorf("failed to build source from backend: %v", err)
+		return nil, fmt.Errorf("Failed to build source from backend: %v", err)
 	}
 
 	return &v1.PersistentVolume{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        volOptions.PVName,
-			Annotations: map[string]string{},
+			Name: volOptions.PVName,
+			Annotations: map[string]string{
+				SFSAnnotationID: share.ID,
+			},
 		},
 		Spec: v1.PersistentVolumeSpec{
 			PersistentVolumeReclaimPolicy: volOptions.PersistentVolumeReclaimPolicy,
@@ -129,13 +132,22 @@ func (p *Provisioner) Provision(volOptions controller.VolumeOptions) (*v1.Persis
 func (p *Provisioner) Delete(pv *v1.PersistentVolume) error {
 
 	// init sfs client
+	glog.Info("Init sfs client...")
 	client, err := p.cloudconfig.SFSV2Client()
 	if err != nil {
-		return fmt.Errorf("failed to create SFS v2 client: %v", err)
+		return fmt.Errorf("Failed to create SFS v2 client: %v", err)
+	}
+
+	// get share id
+	var shareid string
+	shareid, ok := pv.ObjectMeta.Annotations[SFSAnnotationID]
+	if (!ok) || (shareid == "") {
+		return fmt.Errorf("Failed to get share id: %v", pv)
 	}
 
 	// delete share
-	err = DeleteShare(client, "")
+	glog.Infof("Delete share: %s", shareid)
+	err = DeleteShare(client, shareid)
 	if err != nil {
 		return fmt.Errorf("failed to delete share: %v", err)
 	}
