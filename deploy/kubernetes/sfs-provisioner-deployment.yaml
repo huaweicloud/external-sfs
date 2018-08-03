@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sfs-provisioner
+  labels:
+    app: sfs-provisioner
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sfs-provisioner
+  template:
+    metadata:
+      labels:
+        app: sfs-provisioner
+    spec:
+      serviceAccount: sfs-provisioner
+      containers:
+      - name: sfs-provisioner
+        image: docker.io/huaweicloud/sfs-provisioner
+        imagePullPolicy: IfNotPresent
+        args:
+          - "--cloudconfig=$(CLOUD_CONFIG)"
+        env:
+          - name: CLOUD_CONFIG
+          - value: /etc/config/cloud.conf
