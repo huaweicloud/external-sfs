@@ -20,6 +20,8 @@ import (
 	"errors"
 	"os"
 
+	"github.com/golang/glog"
+
 	"gopkg.in/gcfg.v1"
 )
 
@@ -31,6 +33,7 @@ func LoadConfig(configFile string) (cc CloudCredentials, err error) {
 	}
 
 	// Get config from file
+	glog.Infof("load config from file: %s", configFile)
 	file, err := os.Open(configFile)
 	if err != nil {
 		return cc, err

@@ -52,15 +52,15 @@ func main() {
 	kubeconfigEnv := os.Getenv("KUBECONFIG")
 
 	if kubeconfigEnv != "" {
-		glog.Infof("Found KUBECONFIG environment variable set, using that..")
+		glog.Info("Found KUBECONFIG environment variable set, using that..")
 		kubeconfig = &kubeconfigEnv
 	}
 
 	if *master != "" || *kubeconfig != "" {
-		glog.Infof("Either master or kubeconfig specified. building kube config from that..")
+		glog.Info("Either master or kubeconfig specified. building kube config from that..")
 		restconfig, err = clientcmd.BuildConfigFromFlags(*master, *kubeconfig)
 	} else {
-		glog.Infof("Building kube configs for running in cluster...")
+		glog.Info("Building kube configs for running in cluster...")
 		restconfig, err = rest.InClusterConfig()
 	}
 	if err != nil {
@@ -82,6 +82,9 @@ func main() {
 	if err != nil {
 		glog.Fatalf("Error getting server version: %v", err)
 	}
+
+	glog.Infof("Get informations. server version: %s share time out: %d",
+		serverVersion.GitVersion, *sharetimeout)
 
 	provisionController := controller.NewProvisionController(
 		clientset,

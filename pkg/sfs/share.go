@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/golang/glog"
 	"github.com/huaweicloud/golangsdk"
 	"github.com/huaweicloud/golangsdk/openstack/sfs/v2/shares"
 	"github.com/kubernetes-incubator/external-storage/lib/controller"
@@ -35,30 +36,30 @@ func CreateShare(client *golangsdk.ServiceClient, volOptions *controller.VolumeO
 	// build name
 	createOpts.Name = "pvc-" + string(volOptions.PVC.GetUID())
 	// build share proto
-	createOpts.ShareProto = volOptions.Parameters["protocol"]
+	createOpts.ShareProto = volOptions.Parameters[SFSParametersProtocol]
 	if createOpts.ShareProto == "" {
-		createOpts.ShareProto = "NFS"
+		createOpts.ShareProto = SFSParametersProtocolDefault
 	}
 	// build size
 	size, err := getStorageSize(volOptions.PVC)
 	if err != nil {
-		return nil, fmt.Errorf("couldn't retrieve PVC storage size: %v", err)
+		return nil, fmt.Errorf("Couldn't retrieve PVC storage size: %v", err)
 	}
 	createOpts.Size = size
 	// build availability
-	az := volOptions.Parameters["availability"]
+	az := volOptions.Parameters[SFSParametersAvailability]
 	if az != "" {
 		createOpts.AvailabilityZone = az
 	}
 	// build type
-	tp := volOptions.Parameters["type"]
+	tp := volOptions.Parameters[SFSParametersType]
 	if tp != "" {
 		createOpts.ShareType = tp
 	}
-	// build network
-	network := volOptions.Parameters["network"]
-	if network != "" {
-		createOpts.ShareNetworkID = network
+	// build networkid
+	networkid := volOptions.Parameters[SFSParametersNetworkID]
+	if networkid != "" {
+		createOpts.ShareNetworkID = networkid
 	}
 	// build metadata
 	createOpts.Metadata = map[string]string{
@@ -68,9 +69,10 @@ func CreateShare(client *golangsdk.ServiceClient, volOptions *controller.VolumeO
 	}
 
 	// create share
+	glog.Infof("Create share createOpts: %v", createOpts)
 	share, err := shares.Create(client, createOpts).Extract()
 	if err != nil {
-		return nil, fmt.Errorf("couldn't create share in SFS: %v", err)
+		return nil, fmt.Errorf("Couldn't create share in SFS: %v", err)
 	}
 	return share, nil
 }
@@ -102,7 +104,7 @@ func DeleteShare(client *golangsdk.ServiceClient, shareID string) error {
 
 // getStorageSize from pvc
 func getStorageSize(pvc *v1.PersistentVolumeClaim) (int, error) {
-	errStorageSizeNotConfigured := fmt.Errorf("requested storage capacity must be set")
+	errStorageSizeNotConfigured := fmt.Errorf("Requested storage capacity must be set")
 
 	if pvc.Spec.Resources.Requests == nil {
 		return 0, errStorageSizeNotConfigured
@@ -114,11 +116,11 @@ func getStorageSize(pvc *v1.PersistentVolumeClaim) (int, error) {
 	}
 
 	if storageSize.IsZero() {
-		return 0, fmt.Errorf("requested storage size must not have zero value")
+		return 0, fmt.Errorf("Requested storage size must not have zero value")
 	}
 
 	if storageSize.Sign() == -1 {
-		return 0, fmt.Errorf("requested storage size must be greater than zero")
+		return 0, fmt.Errorf("Requested storage size must be greater than zero")
 	}
 
 	var buf []byte
