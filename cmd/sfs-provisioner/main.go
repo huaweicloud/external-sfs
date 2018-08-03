@@ -37,7 +37,7 @@ var (
 	provisioner  = flag.String("provisioner", "external.k8s.io/sfs", "Name of the provisioner. The provisioner will only provision volumes for claims that request a StorageClass with a provisioner field set equal to this name.")
 	master       = flag.String("master", "", "Master URL to build a client config from. Either this or kubeconfig needs to be set if the provisioner is being run out of cluster.")
 	kubeconfig   = flag.String("kubeconfig", "", "Absolute path to the kubeconfig file. Either this or master needs to be set if the provisioner is being run out of cluster.")
-	cloudconfig  = flag.String("cloudconfig", "/etc/config/cloud.conf", "Absolute path to the cloud config")
+	cloudconfig  = flag.String("cloudconfig", "/etc/origin/cloudprovider/openstack.conf", "Absolute path to the cloud config")
 	sharetimeout = flag.Int("sharetimeout", 600, "Share operation timeout. Unit: second")
 )
 
