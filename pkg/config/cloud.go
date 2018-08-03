@@ -30,23 +30,24 @@ import (
 
 // CloudCredentials define
 type CloudCredentials struct {
-	AccessKey        string `json:"access_key"`
-	SecretKey        string `json:"secret_key"`
-	CACertFile       string `json:"cacert_file"`
-	ClientCertFile   string `json:"cert"`
-	ClientKeyFile    string `json:"key"`
-	DomainID         string `json:"domain_id"`
-	DomainName       string `json:"domain_name"`
-	EndpointType     string `json:"endpoint_type"`
-	IdentityEndpoint string `json:"auth_url"`
-	Insecure         bool   `json:"insecure"`
-	Password         string `json:"password"`
-	Region           string `json:"region"`
-	TenantID         string `json:"tenant_id"`
-	TenantName       string `json:"tenant_name"`
-	Token            string `json:"token"`
-	Username         string `json:"user_name"`
-	UserID           string `json:"user_id"`
+	Global struct {
+		AuthURL        string `gcfg:"auth-url"`
+		Username       string
+		UserID         string `gcfg:"user-id"`
+		Password       string
+		TenantID       string `gcfg:"tenant-id"`
+		TenantName     string `gcfg:"tenant-name"`
+		DomainID       string `gcfg:"domain-id"`
+		DomainName     string `gcfg:"domain-name"`
+		Region         string
+		AccessKey      string `gcfg:"access-key"`
+		SecretKey      string `gcfg:"secret-key"`
+		CACertFile     string `gcfg:"cacert-file"`
+		ClientCertFile string `gcfg:"cert"`
+		ClientKeyFile  string `gcfg:"key"`
+		EndpointType   string `gcfg:"endpoint-type"`
+		Insecure       bool
+	}
 
 	CloudClient *golangsdk.ProviderClient
 }
@@ -62,7 +63,7 @@ func (c *CloudCredentials) Validate() error {
 	}
 
 	for _, endpoint := range validEndpoints {
-		if c.EndpointType == endpoint {
+		if c.Global.EndpointType == endpoint {
 			validEndpoint = true
 		}
 	}
@@ -82,15 +83,14 @@ func (c *CloudCredentials) Validate() error {
 // newCloudClient returns new cloud client
 func (c *CloudCredentials) newCloudClient() error {
 	ao := golangsdk.AuthOptions{
-		DomainID:         c.DomainID,
-		DomainName:       c.DomainName,
-		IdentityEndpoint: c.IdentityEndpoint,
-		Password:         c.Password,
-		TenantID:         c.TenantID,
-		TenantName:       c.TenantName,
-		TokenID:          c.Token,
-		Username:         c.Username,
-		UserID:           c.UserID,
+		DomainID:         c.Global.DomainID,
+		DomainName:       c.Global.DomainName,
+		IdentityEndpoint: c.Global.AuthURL,
+		Password:         c.Global.Password,
+		TenantID:         c.Global.TenantID,
+		TenantName:       c.Global.TenantName,
+		Username:         c.Global.Username,
+		UserID:           c.Global.UserID,
 		// allow to renew tokens
 		AllowReauth: true,
 	}
@@ -101,8 +101,8 @@ func (c *CloudCredentials) newCloudClient() error {
 	}
 
 	config := &tls.Config{}
-	if c.CACertFile != "" {
-		caCert, _, err := ReadContents(c.CACertFile)
+	if c.Global.CACertFile != "" {
+		caCert, _, err := ReadContents(c.Global.CACertFile)
 		if err != nil {
 			return fmt.Errorf("Error reading CA Cert: %s", err)
 		}
@@ -112,16 +112,16 @@ func (c *CloudCredentials) newCloudClient() error {
 		config.RootCAs = caCertPool
 	}
 
-	if c.Insecure {
+	if c.Global.Insecure {
 		config.InsecureSkipVerify = true
 	}
 
-	if c.ClientCertFile != "" && c.ClientKeyFile != "" {
-		clientCert, _, err := ReadContents(c.ClientCertFile)
+	if c.Global.ClientCertFile != "" && c.Global.ClientKeyFile != "" {
+		clientCert, _, err := ReadContents(c.Global.ClientCertFile)
 		if err != nil {
 			return fmt.Errorf("Error reading Client Cert: %s", err)
 		}
-		clientKey, _, err := ReadContents(c.ClientKeyFile)
+		clientKey, _, err := ReadContents(c.Global.ClientKeyFile)
 		if err != nil {
 			return fmt.Errorf("Error reading Client Key: %s", err)
 		}
@@ -161,10 +161,10 @@ func (c *CloudCredentials) newCloudClient() error {
 
 // getEndpointType returns cloud endpoint type
 func (c *CloudCredentials) getEndpointType() golangsdk.Availability {
-	if c.EndpointType == "internal" || c.EndpointType == "internalURL" {
+	if c.Global.EndpointType == "internal" || c.Global.EndpointType == "internalURL" {
 		return golangsdk.AvailabilityInternal
 	}
-	if c.EndpointType == "admin" || c.EndpointType == "adminURL" {
+	if c.Global.EndpointType == "admin" || c.Global.EndpointType == "adminURL" {
 		return golangsdk.AvailabilityAdmin
 	}
 	return golangsdk.AvailabilityPublic
@@ -173,7 +173,7 @@ func (c *CloudCredentials) getEndpointType() golangsdk.Availability {
 // SFSV2Client return sfs v2 client
 func (c *CloudCredentials) SFSV2Client() (*golangsdk.ServiceClient, error) {
 	return openstack.NewHwSFSV2(c.CloudClient, golangsdk.EndpointOpts{
-		Region:       c.Region,
+		Region:       c.Global.Region,
 		Availability: c.getEndpointType(),
 	})
 }

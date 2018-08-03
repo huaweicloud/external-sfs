@@ -18,28 +18,49 @@ package sfs
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/huaweicloud/golangsdk"
 	"github.com/huaweicloud/golangsdk/openstack/sfs/v2/shares"
 	"github.com/kubernetes-incubator/external-storage/lib/controller"
+	"k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/kubernetes/pkg/controller/volume/persistentvolume"
 )
 
 // CreateShare in SFS
 func CreateShare(client *golangsdk.ServiceClient, volOptions *controller.VolumeOptions) (*shares.Share, error) {
-	// getStorageSizeInGiga
-	/*size, err := getStorageSizeInGiga(volOptions.PVC)
-	if err != nil {
-		return nil, fmt.Errorf("couldn't retrieve PVC storage size: %v", err)
-	}*/
-
 	// build share createOpts
 	createOpts := shares.CreateOpts{}
-	createOpts.ShareProto = "NFS"
-	createOpts.Size = 10
-	createOpts.Name = "pvc"
-	createOpts.AvailabilityZone = ""
-	createOpts.ShareNetworkID = ""
+	// build name
+	createOpts.Name = "pvc-" + string(volOptions.PVC.GetUID())
+	// build share proto
+	createOpts.ShareProto = volOptions.Parameters["protocol"]
+	if createOpts.ShareProto == "" {
+		createOpts.ShareProto = "NFS"
+	}
+	// build size
+	size, err := getStorageSize(volOptions.PVC)
+	if err != nil {
+		return nil, fmt.Errorf("couldn't retrieve PVC storage size: %v", err)
+	}
+	createOpts.Size = size
+	// build availability
+	az := volOptions.Parameters["availability"]
+	if az != "" {
+		createOpts.AvailabilityZone = az
+	}
+	// build type
+	tp := volOptions.Parameters["type"]
+	if tp != "" {
+		createOpts.ShareType = tp
+	}
+	// build network
+	network := volOptions.Parameters["network"]
+	if network != "" {
+		createOpts.ShareNetworkID = network
+	}
+	// build metadata
 	createOpts.Metadata = map[string]string{
 		persistentvolume.CloudVolumeCreatedForClaimNamespaceTag: volOptions.PVC.Namespace,
 		persistentvolume.CloudVolumeCreatedForClaimNameTag:      volOptions.PVC.Name,
@@ -77,4 +98,32 @@ func DeleteShare(client *golangsdk.ServiceClient, shareID string) error {
 		return result.Err
 	}
 	return nil
+}
+
+// getStorageSize from pvc
+func getStorageSize(pvc *v1.PersistentVolumeClaim) (int, error) {
+	errStorageSizeNotConfigured := fmt.Errorf("requested storage capacity must be set")
+
+	if pvc.Spec.Resources.Requests == nil {
+		return 0, errStorageSizeNotConfigured
+	}
+
+	storageSize, ok := pvc.Spec.Resources.Requests[v1.ResourceStorage]
+	if !ok {
+		return 0, errStorageSizeNotConfigured
+	}
+
+	if storageSize.IsZero() {
+		return 0, fmt.Errorf("requested storage size must not have zero value")
+	}
+
+	if storageSize.Sign() == -1 {
+		return 0, fmt.Errorf("requested storage size must be greater than zero")
+	}
+
+	var buf []byte
+	canonicalValue, _ := storageSize.AsScale(resource.Giga)
+	storageSizeAsByteSlice, _ := canonicalValue.AsCanonicalBytes(buf)
+
+	return strconv.Atoi(string(storageSizeAsByteSlice))
 }

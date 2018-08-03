@@ -21,8 +21,10 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/huaweicloud/external-sfs/pkg/config"
+	"github.com/huaweicloud/external-sfs/pkg/sfs/backends"
 	"github.com/kubernetes-incubator/external-storage/lib/controller"
 	"k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	clientset "k8s.io/client-go/kubernetes"
 )
 
@@ -100,11 +102,14 @@ func (p *Provisioner) Provision(volOptions controller.VolumeOptions) (*v1.Persis
 	if err != nil {
 		return nil, fmt.Errorf("failed to get backend: %v", err)
 	}
-	glog.Infof("get backend: %v", b)
 
-	return nil, nil
+	// get persistent volume source
+	pvsource, err := b.BuildSource(&backends.BuildSourceArgs{Location: location})
+	if err != nil {
+		return nil, fmt.Errorf("failed to build source from backend: %v", err)
+	}
 
-	/*return &v1.PersistentVolume{
+	return &v1.PersistentVolume{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        volOptions.PVName,
 			Annotations: map[string]string{},
@@ -115,9 +120,9 @@ func (p *Provisioner) Provision(volOptions controller.VolumeOptions) (*v1.Persis
 			Capacity: v1.ResourceList{
 				v1.ResourceName(v1.ResourceStorage): volOptions.PVC.Spec.Resources.Requests[v1.ResourceName(v1.ResourceStorage)],
 			},
-			PersistentVolumeSource: b.BuildSource(&backends.BuildSourceArgs{Location: location}),
+			PersistentVolumeSource: *pvsource,
 		},
-	}, nil*/
+	}, nil
 }
 
 // Delete a share from sfs
