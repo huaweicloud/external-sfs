@@ -43,17 +43,13 @@ roleRef:
 
 ---
 
-apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
+apiVersion: apps/v1beta1
 metadata:
   name: sfs-provisioner
-  labels:
-    app: sfs-provisioner
 spec:
+  serviceName: "sfs-provisioner"
   replicas: 1
-  selector:
-    matchLabels:
-      app: sfs-provisioner
   template:
     metadata:
       labels:
@@ -61,19 +57,20 @@ spec:
     spec:
       serviceAccount: sfs-provisioner
       containers:
-      - name: sfs-provisioner
-        image: quay.io/huaweicloud/sfs-provisioner:latest
-        imagePullPolicy: IfNotPresent
-        args:
-          - "--cloudconfig=$(CLOUD_CONFIG)"
-        env:
-          - name: CLOUD_CONFIG
-            value: /etc/origin/cloudprovider/openstack.conf
-        volumeMounts:
-          - name: cloud-config-dir
-            mountPath: /etc/origin
+        - name: sfs-provisioner
+          image: quay.io/huaweicloud/sfs-provisioner:latest
+          imagePullPolicy: Always
+          args:
+            - "--v=5"
+            - "--cloudconfig=$(CLOUD_CONFIG)"
+          env:
+            - name: CLOUD_CONFIG
+              value: /etc/config/cloud.conf
+          volumeMounts:
+            - name: cloud-config-dir
+              mountPath: /etc/config
       volumes:
         - name: cloud-config-dir
           hostPath:
-            path: /etc/origin
+            path: /etc/config
             type: DirectoryOrCreate
