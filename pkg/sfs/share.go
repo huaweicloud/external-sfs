@@ -56,11 +56,6 @@ func CreateShare(client *golangsdk.ServiceClient, volOptions *controller.VolumeO
 	if tp != "" {
 		createOpts.ShareType = tp
 	}
-	// build networkid
-	networkid := volOptions.Parameters[SFSParametersNetworkID]
-	if networkid != "" {
-		createOpts.ShareNetworkID = networkid
-	}
 	// build metadata
 	createOpts.Metadata = map[string]string{
 		persistentvolume.CloudVolumeCreatedForClaimNamespaceTag: volOptions.PVC.Namespace,
@@ -91,6 +86,28 @@ func WaitForShareStatus(client *golangsdk.ServiceClient, shareID string, desired
 // GetShare in SFS
 func GetShare(client *golangsdk.ServiceClient, shareID string) (*shares.Share, error) {
 	return shares.Get(client, shareID).Extract()
+}
+
+// GrantAccess in SFS
+func GrantAccess(client *golangsdk.ServiceClient, volOptions *controller.VolumeOptions, shareID string, vpcid string) error {
+	// build GrantAccessOpts
+	grantAccessOpts := shares.GrantAccessOpts{}
+	grantAccessOpts.AccessLevel = "rw"
+	grantAccessOpts.AccessType = "cert"
+	// build vpcid
+	id := volOptions.Parameters[SFSParametersVPCID]
+	if id != "" {
+		grantAccessOpts.AccessTo = id
+	} else {
+		grantAccessOpts.AccessTo = vpcid
+	}
+
+	// grant access
+	result := shares.GrantAccess(client, shareID, grantAccessOpts)
+	if result.Err != nil {
+		return result.Err
+	}
+	return nil
 }
 
 // DeleteShare in SFS

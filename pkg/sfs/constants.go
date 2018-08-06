@@ -22,7 +22,7 @@ const (
 	SFSAnnotationID    = "external.k8s.io/sfs-id"
 
 	SFSParametersAvailability    = "availability"
-	SFSParametersNetworkID       = "networkid"
+	SFSParametersVPCID           = "vpcid"
 	SFSParametersProtocol        = "protocol"
 	SFSParametersProtocolDefault = "NFS"
 	SFSParametersType            = "type"
