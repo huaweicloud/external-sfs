@@ -8,7 +8,28 @@ on huawei clouds.
 Compatible with the Network File System protocol, SFS is expandable to petabytes, features high performance,
 and seamlessly handles data-intensive and bandwidth-intensive applications.
 
-This repository houses external sfs provisioner for Kubernetes.
+This repository houses external sfs provisioner for OpenShift and Kubernetes.
+
+## Getting Started on OpenShift
+
+### Deploy
+
+```
+oc adm policy add-scc-to-user privileged system:serviceaccount:default:sfs-provisioner
+oc create -f https://raw.githubusercontent.com/huaweicloud/external-sfs/master/deploy/sfs-provisioner/openshift/statefulset.yaml
+```
+
+### Usage
+
+## Getting Started on Kubernetes
+
+### Deploy
+
+```
+kubectl create -f https://raw.githubusercontent.com/huaweicloud/external-sfs/master/deploy/sfs-provisioner/kubernetes/statefulset.yaml
+```
+
+### Usage
 
 ## License
 
