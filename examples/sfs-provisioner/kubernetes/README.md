@@ -21,5 +21,5 @@ kubectl create -f https://raw.githubusercontent.com/huaweicloud/external-sfs/mas
 If you want to create all of the above resources, you could run:
 
 ```
-kubectl create -f https://raw.githubusercontent.com/huaweicloud/external-sfs/master/examples/sfs-provisioner/kubernetes/
+kubectl create -f https://raw.githubusercontent.com/huaweicloud/external-sfs/master/examples/sfs-provisioner/kubernetes/example.yaml
 ```

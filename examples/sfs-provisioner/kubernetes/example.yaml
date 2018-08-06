@@ -1,0 +1,44 @@
+apiVersion: storage.k8s.io/v1beta1
+kind: StorageClass
+metadata:
+  name: sfs-storage-class
+provisioner: external.k8s.io/sfs
+parameters:
+  protocol: NFS
+
+---
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: sfs-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10G
+  storageClassName: sfs-storage-class
+
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx 
+spec:
+  containers:
+  - image: nginx
+    imagePullPolicy: IfNotPresent
+    name: nginx
+    ports:
+    - containerPort: 80
+      protocol: TCP
+    volumeMounts:
+      - mountPath: /var/lib/www/html
+        name: sfs-data 
+  volumes:
+  - name: sfs-data
+    persistentVolumeClaim:
+      claimName: sfs-pvc 
+      readOnly: false
