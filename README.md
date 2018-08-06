@@ -22,7 +22,7 @@ oc create -f https://raw.githubusercontent.com/huaweicloud/external-sfs/master/d
 ### Usage
 
 ```
-oc create -f https://raw.githubusercontent.com/huaweicloud/external-sfs/master/examples/sfs-provisioner/openshift/
+oc create -f https://raw.githubusercontent.com/huaweicloud/external-sfs/master/examples/sfs-provisioner/openshift/example.yaml
 ```
 
 ## Getting Started on Kubernetes
@@ -36,7 +36,7 @@ kubectl create -f https://raw.githubusercontent.com/huaweicloud/external-sfs/mas
 ### Usage
 
 ```
-kubectl create -f https://raw.githubusercontent.com/huaweicloud/external-sfs/master/examples/sfs-provisioner/kubernetes/
+kubectl create -f https://raw.githubusercontent.com/huaweicloud/external-sfs/master/examples/sfs-provisioner/kubernetes/example.yaml
 ```
 
 ## License

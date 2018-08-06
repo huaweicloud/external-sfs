@@ -21,5 +21,5 @@ oc create -f https://raw.githubusercontent.com/huaweicloud/external-sfs/master/e
 If you want to create all of the above resources, you could run:
 
 ```
-oc create -f https://raw.githubusercontent.com/huaweicloud/external-sfs/master/examples/sfs-provisioner/openshift/
+oc create -f https://raw.githubusercontent.com/huaweicloud/external-sfs/master/examples/sfs-provisioner/openshift/example.yaml
 ```
