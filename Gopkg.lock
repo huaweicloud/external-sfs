@@ -153,7 +153,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:32f434bf5c70cd7583c5d9fbc482b1e7ce751a294e540098cfb1311d6027d160"
+  digest = "1:bde6ad16de363432cd678a126145426d81f946a1efbf50f82dfc746af8b46c93"
   name = "github.com/huaweicloud/golangsdk"
   packages = [
     ".",
@@ -167,7 +167,7 @@
     "pagination",
   ]
   pruneopts = "UT"
-  revision = "7d1c5682d6f16c6b4b9625207edac8cb3c9880c8"
+  revision = "dfc9afb7c801cc2a2ba4a62fdd5510a1c9597aec"
 
 [[projects]]
   digest = "1:8eb1de8112c9924d59bf1d3e5c26f5eaa2bfc2a5fcbb92dc1c2e4546d695f277"
