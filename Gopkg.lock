@@ -114,6 +114,23 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:28aea404e54d16ac3861bfe7162a3f5d79a2d31804adf622cd9471d92b82bb3b"
+  name = "github.com/gophercloud/gophercloud"
+  packages = [
+    ".",
+    "openstack",
+    "openstack/compute/v2/extensions/attachinterfaces",
+    "openstack/identity/v2/tenants",
+    "openstack/identity/v2/tokens",
+    "openstack/identity/v3/tokens",
+    "openstack/utils",
+    "pagination",
+  ]
+  pruneopts = "UT"
+  revision = "9cdae6530f121aca6d530dc54a6c82a49108328c"
+
+[[projects]]
+  branch = "master"
   digest = "1:86c1210529e69d69860f2bb3ee9ccce0b595aa3f9165e7dd1388e5c612915888"
   name = "github.com/gregjones/httpcache"
   packages = [
@@ -136,7 +153,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:0b9253e003c181d2deb52bcfabb8345aa779f36a115cfa89619a2bc7cf8f52a6"
+  digest = "1:32f434bf5c70cd7583c5d9fbc482b1e7ce751a294e540098cfb1311d6027d160"
   name = "github.com/huaweicloud/golangsdk"
   packages = [
     ".",
@@ -144,6 +161,7 @@
     "openstack/identity/v2/tenants",
     "openstack/identity/v2/tokens",
     "openstack/identity/v3/tokens",
+    "openstack/networking/v1/subnets",
     "openstack/sfs/v2/shares",
     "openstack/utils",
     "pagination",
@@ -743,8 +761,13 @@
   input-imports = [
     "github.com/Unknwon/com",
     "github.com/golang/glog",
+    "github.com/gophercloud/gophercloud",
+    "github.com/gophercloud/gophercloud/openstack",
+    "github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/attachinterfaces",
+    "github.com/gophercloud/gophercloud/pagination",
     "github.com/huaweicloud/golangsdk",
     "github.com/huaweicloud/golangsdk/openstack",
+    "github.com/huaweicloud/golangsdk/openstack/networking/v1/subnets",
     "github.com/huaweicloud/golangsdk/openstack/sfs/v2/shares",
     "github.com/kubernetes-incubator/external-storage/lib/controller",
     "github.com/mitchellh/go-homedir",

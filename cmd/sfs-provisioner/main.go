@@ -39,6 +39,7 @@ var (
 	kubeconfig   = flag.String("kubeconfig", "", "Absolute path to the kubeconfig file. Either this or master needs to be set if the provisioner is being run out of cluster.")
 	cloudconfig  = flag.String("cloudconfig", "/etc/origin/cloudprovider/openstack.conf", "Absolute path to the cloud config")
 	sharetimeout = flag.Int("sharetimeout", 600, "Share operation timeout. Unit: second")
+	vpcid        = flag.String("vpcid", "", "The ID of VPC which the cluster is belong to")
 )
 
 func main() {
@@ -89,7 +90,7 @@ func main() {
 	provisionController := controller.NewProvisionController(
 		clientset,
 		*provisioner,
-		sfs.NewProvisioner(clientset, cc, *sharetimeout),
+		sfs.NewProvisioner(clientset, cc, *sharetimeout, *vpcid),
 		serverVersion.GitVersion,
 	)
 

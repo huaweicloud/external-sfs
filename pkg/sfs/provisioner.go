@@ -33,19 +33,26 @@ type Provisioner struct {
 	clientset    clientset.Interface
 	cloudconfig  config.CloudCredentials
 	sharetimeout int
+	vpcid        string
 }
 
 // NewProvisioner creates a new instance of sfs provisioner
-func NewProvisioner(c clientset.Interface, cc config.CloudCredentials, timeout int) *Provisioner {
+func NewProvisioner(c clientset.Interface, cc config.CloudCredentials, timeout int, vpcid string) *Provisioner {
 
 	// init backends for provisioner
 	InitBackends()
+
+	// init vpc for provisioner
+	if vpcid == "" {
+		vpcid = InitVPC(cc)
+	}
 
 	// return provisioner instance
 	return &Provisioner{
 		clientset:    c,
 		cloudconfig:  cc,
 		sharetimeout: timeout,
+		vpcid:        vpcid,
 	}
 }
 
@@ -84,6 +91,13 @@ func (p *Provisioner) Provision(volOptions controller.VolumeOptions) (*v1.Persis
 	share, err = GetShare(client, share.ID)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to get share: %v", err)
+	}
+
+	// grant access
+	glog.Infof("Grant access: %s", share.ID)
+	err = GrantAccess(client, &volOptions, share.ID, p.vpcid)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to grant access: %v", err)
 	}
 
 	// get location
