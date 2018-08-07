@@ -69,8 +69,14 @@ spec:
           volumeMounts:
             - name: cloud-config-dir
               mountPath: /etc/config
+            - name: cloud-data-dir
+              mountPath: /var/lib/cloud/data
       volumes:
         - name: cloud-config-dir
           hostPath:
             path: /etc/config
+            type: DirectoryOrCreate
+        - name: cloud-data-dir
+          hostPath:
+            path: /var/lib/cloud/data
             type: DirectoryOrCreate
