@@ -14,9 +14,28 @@ This repository houses external sfs provisioner for OpenShift and Kubernetes.
 
 ### Deploy
 
+external-sfs should be deployed in the OpenShift Master after OpenShift is deployed successfully.
+In default, the Cloud Tenant informations are stored in the file ```/etc/origin/cloudprovider/openstack.conf``` of OpenShift Master. If your OpenShift Master contains the file ```/etc/origin/cloudprovider/openstack.conf```, please directly run the following command in your OpenShift Master.
+
 ```
 oc adm policy add-scc-to-user privileged system:serviceaccount:default:sfs-provisioner
 oc create -f https://raw.githubusercontent.com/huaweicloud/external-sfs/master/deploy/sfs-provisioner/openshift/statefulset.yaml
+```
+
+If not, please firstly run the following command to download this repository,
+```
+git clone https://github.com/huaweicloud/external-sfs
+```
+and modify the statefulset.yaml,
+```
+vi external-sfs/deploy/sfs-provisioner/openshift/statefulset.yaml
+```
+and replace ```/etc/origin/cloudprovider/openstack.conf``` with your Cloud Config file in the line 68 of statefulset.yaml and replace the path ```/etc/origin``` with your Cloud Config directory in the line 77 of statefulset.yaml,
+
+finally you can run the following command.
+```
+oc adm policy add-scc-to-user privileged system:serviceaccount:default:sfs-provisioner
+oc create -f external-sfs/deploy/sfs-provisioner/openshift/statefulset.yaml
 ```
 
 ### Usage
