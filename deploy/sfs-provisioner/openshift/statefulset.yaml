@@ -58,6 +58,11 @@ spec:
       serviceAccount: sfs-provisioner
       containers:
         - name: sfs-provisioner
+          securityContext:
+            privileged: true
+            capabilities:
+              add: ["SYS_ADMIN"]
+            allowPrivilegeEscalation: true
           image: quay.io/huaweicloud/sfs-provisioner:latest
           imagePullPolicy: Always
           args:
