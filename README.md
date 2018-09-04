@@ -30,9 +30,9 @@ and modify the statefulset.yaml,
 ```
 vi external-sfs/deploy/sfs-provisioner/openshift/statefulset.yaml
 ```
-and replace ```/etc/origin/cloudprovider/openstack.conf``` with your Cloud Config file in the line 68 of statefulset.yaml and replace the path ```/etc/origin``` with your Cloud Config directory in the line 77 of statefulset.yaml,
+and replace ```/etc/origin/cloudprovider/openstack.conf``` with your Cloud Config file in the line 73 of statefulset.yaml and replace the path ```/etc/origin``` with your Cloud Config directory in the line 82 of statefulset.yaml,
 
-if you want to increase the log level, please add the following two lines after the line 68 of statefulset.yaml.
+if you want to increase the log level, please add the following two lines after the line 73 of statefulset.yaml.
 
 ```
             - name: OS_DEBUG
