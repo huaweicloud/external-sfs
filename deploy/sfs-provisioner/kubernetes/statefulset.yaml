@@ -44,12 +44,17 @@ roleRef:
 ---
 
 kind: StatefulSet
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 metadata:
   name: sfs-provisioner
 spec:
-  serviceName: "sfs-provisioner"
+  podManagementPolicy: OrderedReady
   replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: sfs-provisioner
+  serviceName: sfs-provisioner
   template:
     metadata:
       labels:
@@ -66,6 +71,7 @@ spec:
           image: quay.io/huaweicloud/sfs-provisioner:latest
           imagePullPolicy: Always
           args:
+          # - "--vpcid=YOUR_VPCID mandatory if you have multiple VPCID"
             - "--v=5"
             - "--cloudconfig=$(CLOUD_CONFIG)"
           env:
