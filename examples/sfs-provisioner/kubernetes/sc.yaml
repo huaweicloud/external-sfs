@@ -1,7 +1,8 @@
-apiVersion: storage.k8s.io/v1beta1
+apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   name: sfs-storage-class
 provisioner: external.k8s.io/sfs
+reclaimPolicy: Delete
 parameters:
   protocol: NFS
