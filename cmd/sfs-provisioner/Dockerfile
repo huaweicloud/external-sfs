@@ -1,5 +1,5 @@
 # Based on centos
-FROM centos:7.4.1708
+FROM centos:7.6.1810
 LABEL maintainers="Kubernetes Authors"
 LABEL description="SFS Provisioner"
 
