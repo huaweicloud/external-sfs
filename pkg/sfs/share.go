@@ -19,6 +19,7 @@ package sfs
 import (
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/golang/glog"
 	"github.com/huaweicloud/golangsdk"
@@ -75,6 +76,8 @@ func CreateShare(client *golangsdk.ServiceClient, volOptions *controller.VolumeO
 // WaitForShareStatus wait for share desired status until timeout
 func WaitForShareStatus(client *golangsdk.ServiceClient, shareID string, desiredStatus string, timeout int) error {
 	return golangsdk.WaitFor(timeout, func() (bool, error) {
+		// reduce the amount of API calls
+		time.Sleep(2 * time.Second)
 		share, err := GetShare(client, shareID)
 		if err != nil {
 			return false, err
