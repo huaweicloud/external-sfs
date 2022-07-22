@@ -266,7 +266,7 @@ func (c *CloudCredentials) getNativeEndpointType() gophercloud.Availability {
 
 // SFSV2Client return sfs v2 client
 func (c *CloudCredentials) SFSV2Client() (*golangsdk.ServiceClient, error) {
-	return openstack.NewHwSFSV2(c.CloudClient, golangsdk.EndpointOpts{
+	return openstack.NewSharedFileSystemV2(c.CloudClient, golangsdk.EndpointOpts{
 		Region:       c.Global.Region,
 		Availability: c.getEndpointType(),
 	})

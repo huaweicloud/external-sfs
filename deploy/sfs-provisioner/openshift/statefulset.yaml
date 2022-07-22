@@ -63,7 +63,7 @@ spec:
             capabilities:
               add: ["SYS_ADMIN"]
             allowPrivilegeEscalation: true
-          image: quay.io/huaweicloud/sfs-provisioner:latest
+          image: swr.ap-southeast-1.myhuaweicloud.com/k8s-csi/sfs-provisioner:latest
           imagePullPolicy: Always
           args:
             - "--v=5"

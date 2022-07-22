@@ -12,7 +12,7 @@ sfs-provisioner:package
 
 docker:sfs-provisioner
 	cp ./bin/sfs-provisioner ./cmd/sfs-provisioner
-	docker build cmd/sfs-provisioner -t quay.io/huaweicloud/sfs-provisioner:latest
+	docker build cmd/sfs-provisioner -t swr.ap-southeast-1.myhuaweicloud.com/k8s-csi/sfs-provisioner:latest
 
 clean:
 	rm -rf ./bin/

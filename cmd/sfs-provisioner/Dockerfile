@@ -6,6 +6,9 @@ LABEL description="SFS Provisioner"
 # Copy from build directory
 COPY sfs-provisioner /sfs-provisioner
 
+# Grant execute permission
+RUN chmod +x /sfs-provisioner
+
 # Update
 RUN yum -y update
 

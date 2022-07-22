@@ -1,4 +1,4 @@
-apiVersion: storage.k8s.io/v1beta1
+apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   name: sfs-storage-class
@@ -25,7 +25,7 @@ spec:
 apiVersion: v1
 kind: Pod
 metadata:
-  name: nginx 
+  name: nginx
 spec:
   containers:
   - image: nginx
@@ -40,5 +40,5 @@ spec:
   volumes:
   - name: sfs-data
     persistentVolumeClaim:
-      claimName: sfs-pvc 
+      claimName: sfs-pvc
       readOnly: false
